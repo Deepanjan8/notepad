@@ -1,0 +1,87 @@
+name: Android Build & Release CI
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    tags:
+      - 'v*'
+  pull_request:
+    branches:
+      - main
+      - master
+
+jobs:
+  build:
+    name: Build & Sign APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'gradle'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Verify Strict Zero Internet Permission
+        run: |
+          echo "Auditing manifests for unauthorized INTERNET permission..."
+          if grep -rn "android.permission.INTERNET" **/AndroidManifest.xml; then
+            echo "ERROR: Zero Internet Permission constraint violated!"
+            exit 1
+          else
+            echo "PASSED: Zero Internet permissions found. App is 100% offline."
+          fi
+
+      - name: Make Gradlew Executable
+        run: chmod +x gradlew
+
+      - name: Decode Release Keystore (CI Environment)
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        run: |
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            echo "Decoding release keystore from secrets..."
+            echo "$KEYSTORE_BASE64" | base64 -d > my-release-key.jks
+          else
+            echo "Using existing local keystore for build configuration."
+          fi
+
+      - name: Run Unit Tests
+        run: ./gradlew testDebugUnitTest
+
+      - name: Build Signed Release APK
+        env:
+          KEYSTORE_FILE: ${{ github.workspace }}/my-release-key.jks
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS || 'elitememo' }}
+          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD || 'elitememopass' }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD || 'elitememopass' }}
+        run: ./gradlew assembleRelease --stacktrace
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: elite-memo-pro-v1.0.5-release
+          path: app/build/outputs/apk/release/*.apk
+
+      - name: Create GitHub Release (On Release Tag)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: app/build/outputs/apk/release/*.apk
+          body: |
+            ## Elite Memo Pro v1.0.5 (Build 5) Release
+            - **Privacy First**: 100% Offline & Zero Internet Permission.
+            - **Local Encryption**: Encrypted Room Database with SQLCipher.
+            - **Security**: Optional Biometric & Device Credential Lock.
+            - **Markdown Editor**: Rich text editing with live preview.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

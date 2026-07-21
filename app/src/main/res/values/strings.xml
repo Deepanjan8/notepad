@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Elite Memo Pro</string>
+    <string name="security_lock_title">Elite Memo Pro Security</string>
+    <string name="security_lock_subtitle">Authenticate to access your encrypted notes</string>
+    <string name="unlock">Unlock</string>
+    <string name="search_notes">Search notes...</string>
+    <string name="no_notes">No notes found. Tap + to create one!</string>
+    <string name="new_note">New Note</string>
+    <string name="edit_note">Edit Note</string>
+    <string name="settings">Settings</string>
+    <string name="use_device_lock">Use Device Lock</string>
+    <string name="use_device_lock_desc">Require Fingerprint, Face, or PIN to open Elite Memo Pro</string>
+</resources>

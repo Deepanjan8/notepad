@@ -1,0 +1,16 @@
+*.iml
+.gradle
+/local.properties
+/.idea/
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+
+# Signing Keystores (SECURITY: DO NOT COMMIT KEYSTORES TO REPO)
+*.jks
+*.keystore
+my-release-key.jks
+keystore.properties
