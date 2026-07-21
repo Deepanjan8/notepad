@@ -14,9 +14,9 @@ object DatabaseEncryption {
             .build()
 
         EncryptedSharedPreferences.create(
-            context,
             PREF_NAME,
-            masterKey,
+            masterKey.keyAlias,
+            context,
             EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SKEY_SEQUENCE,
             EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
         )

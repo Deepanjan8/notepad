@@ -18,9 +18,9 @@ class EncryptedPreferences @Inject constructor(
                 .build()
 
             EncryptedSharedPreferences.create(
-                context,
                 "elite_memo_app_settings",
-                masterKey,
+                masterKey.keyAlias,
+                context,
                 EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SKEY_SEQUENCE,
                 EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
             )
