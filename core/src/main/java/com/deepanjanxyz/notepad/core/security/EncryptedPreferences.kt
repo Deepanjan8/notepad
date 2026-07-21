@@ -3,7 +3,7 @@ package com.deepanjanxyz.notepad.core.security
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
-import androidx.security.crypto.MasterKey
+import androidx.security.crypto.MasterKeys
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -13,13 +13,11 @@ class EncryptedPreferences @Inject constructor(
 ) {
     private val sharedPreferences: SharedPreferences by lazy {
         runCatching {
-            val masterKey = MasterKey.Builder(context)
-                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-                .build()
+            val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
 
             EncryptedSharedPreferences.create(
                 "elite_memo_app_settings",
-                masterKey.keyAlias,
+                masterKeyAlias,
                 context,
                 EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SKEY_SEQUENCE,
                 EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
