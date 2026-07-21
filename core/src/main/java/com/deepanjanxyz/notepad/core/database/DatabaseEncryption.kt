@@ -17,7 +17,7 @@ object DatabaseEncryption {
             PREF_NAME,
             masterKeyAlias,
             context,
-            PrefKeyEncryptionScheme.AES256_SKEY_SEQUENCE,
+            PrefKeyEncryptionScheme.AES256_SIV,
             PrefValueEncryptionScheme.AES256_GCM
         )
     }.getOrElse {

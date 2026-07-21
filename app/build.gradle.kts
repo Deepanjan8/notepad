@@ -16,12 +16,12 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     namespace = "com.deepanjanxyz.notepad"
-    compileSdk = 34
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.deepanjanxyz.notepad"
         minSdk = 26
-        targetSdk = 34
+        targetSdk = 37
         versionCode = 5
         versionName = "1.0.5"
 

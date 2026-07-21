@@ -21,7 +21,7 @@ class EncryptedPreferences @Inject constructor(
                 "elite_memo_app_settings",
                 masterKeyAlias,
                 context,
-                PrefKeyEncryptionScheme.AES256_SKEY_SEQUENCE,
+                PrefKeyEncryptionScheme.AES256_SIV,
                 PrefValueEncryptionScheme.AES256_GCM
             )
         }.getOrElse {
