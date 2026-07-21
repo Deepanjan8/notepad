@@ -57,12 +57,12 @@ dependencies {
     api(libs.androidx.room.runtime)
     api(libs.androidx.room.ktx)
     kapt(libs.androidx.room.compiler)
-    api("net.zetetic:sqlcipher-android:4.5.4")
+    api("net.zetetic:sqlcipher-android:4.5.4@aar")
     api("androidx.sqlite:sqlite-ktx:2.4.0")
 
     // Security & DataStore & Biometric
-    api("androidx.security:security-crypto:1.1.0-alpha06")
-    api("androidx.biometric:biometric:1.1.0")
+    api("androidx.security:security-crypto:1.1.0-alpha06@aar")
+    api("androidx.biometric:biometric:1.1.0@aar")
     api(libs.androidx.datastore.preferences)
 
     // Coroutines

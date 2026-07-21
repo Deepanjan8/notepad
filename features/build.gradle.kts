@@ -58,8 +58,8 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
 
     // Security, Biometric, Datastore
-    implementation("androidx.security:security-crypto:1.1.0-alpha06")
-    implementation("androidx.biometric:biometric:1.1.0")
+    implementation("androidx.security:security-crypto:1.1.0-alpha06@aar")
+    implementation("androidx.biometric:biometric:1.1.0@aar")
     implementation(libs.androidx.datastore.preferences)
 
     // Coroutines
