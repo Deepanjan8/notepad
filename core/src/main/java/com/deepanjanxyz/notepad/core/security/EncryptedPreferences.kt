@@ -3,6 +3,8 @@ package com.deepanjanxyz.notepad.core.security
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.EncryptedSharedPreferences.PrefKeyEncryptionScheme
+import androidx.security.crypto.EncryptedSharedPreferences.PrefValueEncryptionScheme
 import androidx.security.crypto.MasterKeys
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -19,8 +21,8 @@ class EncryptedPreferences @Inject constructor(
                 "elite_memo_app_settings",
                 masterKeyAlias,
                 context,
-                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SKEY_SEQUENCE,
-                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+                PrefKeyEncryptionScheme.AES256_SKEY_SEQUENCE,
+                PrefValueEncryptionScheme.AES256_GCM
             )
         }.getOrElse {
             context.getSharedPreferences("elite_memo_app_settings_fallback", Context.MODE_PRIVATE)

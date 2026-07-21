@@ -2,6 +2,8 @@ package com.deepanjanxyz.notepad.core.database
 
 import android.content.Context
 import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.EncryptedSharedPreferences.PrefKeyEncryptionScheme
+import androidx.security.crypto.EncryptedSharedPreferences.PrefValueEncryptionScheme
 import androidx.security.crypto.MasterKeys
 
 object DatabaseEncryption {
@@ -15,8 +17,8 @@ object DatabaseEncryption {
             PREF_NAME,
             masterKeyAlias,
             context,
-            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SKEY_SEQUENCE,
-            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            PrefKeyEncryptionScheme.AES256_SKEY_SEQUENCE,
+            PrefValueEncryptionScheme.AES256_GCM
         )
     }.getOrElse {
         context.getSharedPreferences("elite_memo_sec_prefs_fallback", Context.MODE_PRIVATE)
