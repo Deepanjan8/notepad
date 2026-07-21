@@ -1,6 +1,3 @@
-import java.io.FileInputStream
-import java.util.Properties
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -8,20 +5,14 @@ plugins {
     alias(libs.plugins.hilt)
 }
 
-val keystorePropertiesFile = rootProject.file("keystore.properties")
-val keystoreProperties = Properties()
-if (keystorePropertiesFile.exists()) {
-    keystoreProperties.load(FileInputStream(keystorePropertiesFile))
-}
-
 android {
     namespace = "com.deepanjanxyz.notepad"
-    compileSdk = 37
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.deepanjanxyz.notepad"
         minSdk = 26
-        targetSdk = 37
+        targetSdk = 35
         versionCode = 5
         versionName = "1.0.5"
 
@@ -33,23 +24,10 @@ android {
 
     signingConfigs {
         create("release") {
-            val keyFile = file(
-                System.getenv("KEYSTORE_FILE")
-                    ?: keystoreProperties.getProperty("storeFile")
-                    ?: "${rootProject.rootDir}/my-release-key.jks"
-            )
-            if (keyFile.exists()) {
-                storeFile = keyFile
-                storePassword = System.getenv("STORE_PASSWORD")
-                    ?: keystoreProperties.getProperty("storePassword")
-                    ?: "elitememopass"
-                keyAlias = System.getenv("KEY_ALIAS")
-                    ?: keystoreProperties.getProperty("keyAlias")
-                    ?: "elitememo"
-                keyPassword = System.getenv("KEY_PASSWORD")
-                    ?: keystoreProperties.getProperty("keyPassword")
-                    ?: "elitememopass"
-            }
+            storeFile = file("${rootProject.rootDir}/my-release-key.jks")
+            storePassword = System.getenv("STORE_PASSWORD") ?: "elitememopass"
+            keyAlias = System.getenv("KEY_ALIAS") ?: "elitememo"
+            keyPassword = System.getenv("KEY_PASSWORD") ?: "elitememopass"
         }
     }
 
@@ -108,8 +86,8 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
 
     // Security & Biometric
-    implementation("androidx.security:security-crypto:1.0.0")
-    implementation("androidx.biometric:biometric:1.1.0")
+    implementation(libs.androidx.security.crypto)
+    implementation(libs.androidx.biometric)
     implementation(libs.androidx.datastore.preferences)
 
     // Hilt
