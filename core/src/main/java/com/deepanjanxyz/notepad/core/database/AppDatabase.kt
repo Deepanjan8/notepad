@@ -22,32 +22,22 @@ abstract class AppDatabase : RoomDatabase() {
 
         fun getInstance(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
-                val instance = runCatching {
-                    val factory = DatabaseEncryption.createSupportFactory(context)
-                    Room.databaseBuilder(
-                        context.applicationContext,
-                        AppDatabase::class.java,
-                        "elite_memo_encrypted.db"
-                    )
-                        .openHelperFactory(factory)
-                        .addCallback(object : Callback() {
-                            override fun onCreate(db: SupportSQLiteDatabase) {
-                                super.onCreate(db)
-                                db.execSQL("INSERT INTO categories (id, name, colorHex, iconName) VALUES (1, 'General', '#6200EE', 'folder')")
-                                db.execSQL("INSERT INTO categories (id, name, colorHex, iconName) VALUES (2, 'Work', '#03DAC6', 'briefcase')")
-                                db.execSQL("INSERT INTO categories (id, name, colorHex, iconName) VALUES (3, 'Personal', '#FF0266', 'user')")
-                                db.execSQL("INSERT INTO categories (id, name, colorHex, iconName) VALUES (4, 'Ideas', '#FFDE03', 'lightbulb')")
-                            }
-                        })
-                        .fallbackToDestructiveMigration()
-                        .build()
-                }.getOrElse {
-                    // Fallback to unencrypted in-memory DB if SQLCipher fails to initialize
-                    Room.inMemoryDatabaseBuilder(
-                        context.applicationContext,
-                        AppDatabase::class.java
-                    ).build()
-                }
+                val instance = Room.databaseBuilder(
+                    context.applicationContext,
+                    AppDatabase::class.java,
+                    "elite_memo_db.db"
+                )
+                    .addCallback(object : Callback() {
+                        override fun onCreate(db: SupportSQLiteDatabase) {
+                            super.onCreate(db)
+                            db.execSQL("INSERT INTO categories (id, name, colorHex, iconName) VALUES (1, 'General', '#6200EE', 'folder')")
+                            db.execSQL("INSERT INTO categories (id, name, colorHex, iconName) VALUES (2, 'Work', '#03DAC6', 'briefcase')")
+                            db.execSQL("INSERT INTO categories (id, name, colorHex, iconName) VALUES (3, 'Personal', '#FF0266', 'user')")
+                            db.execSQL("INSERT INTO categories (id, name, colorHex, iconName) VALUES (4, 'Ideas', '#FFDE03', 'lightbulb')")
+                        }
+                    })
+                    .fallbackToDestructiveMigration()
+                    .build()
                 INSTANCE = instance
                 instance
             }

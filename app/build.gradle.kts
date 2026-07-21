@@ -107,10 +107,9 @@ dependencies {
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.navigation.compose)
 
-    // Security & Biometric & SQLCipher
-    implementation("androidx.security:security-crypto:1.1.0-alpha06@aar")
-    implementation("androidx.biometric:biometric:1.1.0@aar")
-    implementation("net.zetetic:sqlcipher-android:4.5.4@aar")
+    // Security & Biometric
+    implementation("androidx.security:security-crypto:1.0.0")
+    implementation("androidx.biometric:biometric:1.1.0")
     implementation(libs.androidx.datastore.preferences)
 
     // Hilt
