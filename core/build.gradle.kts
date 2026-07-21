@@ -42,34 +42,34 @@ android {
 }
 
 dependencies {
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
+    api(libs.androidx.core.ktx)
+    api(libs.androidx.lifecycle.runtime.ktx)
     
     // Compose UI & Material 3
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.compose.ui)
-    implementation(libs.androidx.compose.ui.graphics)
-    implementation(libs.androidx.compose.ui.tooling.preview)
-    implementation(libs.androidx.compose.material3)
-    implementation(libs.androidx.compose.material.icons.extended)
+    api(platform(libs.androidx.compose.bom))
+    api(libs.androidx.compose.ui)
+    api(libs.androidx.compose.ui.graphics)
+    api(libs.androidx.compose.ui.tooling.preview)
+    api(libs.androidx.compose.material3)
+    api(libs.androidx.compose.material.icons.extended)
 
     // Room & SQLCipher Encryption
-    implementation(libs.androidx.room.runtime)
-    implementation(libs.androidx.room.ktx)
+    api(libs.androidx.room.runtime)
+    api(libs.androidx.room.ktx)
     kapt(libs.androidx.room.compiler)
-    implementation("net.zetetic:sqlcipher-android:4.5.4")
-    implementation("androidx.sqlite:sqlite-ktx:2.4.0")
+    api("net.zetetic:sqlcipher-android:4.5.4")
+    api("androidx.sqlite:sqlite-ktx:2.4.0")
 
     // Security & DataStore & Biometric
-    implementation("androidx.security:security-crypto:1.1.0-alpha06")
-    implementation("androidx.biometric:biometric:1.1.0")
-    implementation(libs.androidx.datastore.preferences)
+    api("androidx.security:security-crypto:1.1.0-alpha06")
+    api("androidx.biometric:biometric:1.1.0")
+    api(libs.androidx.datastore.preferences)
 
     // Coroutines
-    implementation(libs.kotlinx.coroutines.android)
+    api(libs.kotlinx.coroutines.android)
 
     // Hilt
-    implementation(libs.hilt.android)
+    api(libs.hilt.android)
     kapt(libs.hilt.compiler)
 
     // Testing
