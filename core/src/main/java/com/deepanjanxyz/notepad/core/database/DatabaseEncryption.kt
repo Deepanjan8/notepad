@@ -1,8 +1,6 @@
 package com.deepanjanxyz.notepad.core.database
 
 import android.content.Context
-import android.security.keystore.KeyGenParameterSpec
-import android.security.keystore.KeyProperties
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import net.sqlcipher.database.SupportFactory
@@ -37,7 +35,6 @@ object DatabaseEncryption {
             }
             Base64.getDecoder().decode(passphraseBase64)
         }.getOrElse {
-            // Fallback key if EncryptedSharedPreferences fails due to device keystore issue
             "EliteMemoProSecretKeyDefensiveFallback2026".toByteArray()
         }
     }
