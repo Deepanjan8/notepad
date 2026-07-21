@@ -57,12 +57,12 @@ dependencies {
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     kapt(libs.androidx.room.compiler)
-    implementation(libs.sqlcipher.android)
-    implementation(libs.androidx.sqlite.ktx)
+    implementation("net.zetetic:sqlcipher-android:4.5.4")
+    implementation("androidx.sqlite:sqlite-ktx:2.4.0")
 
     // Security & DataStore & Biometric
-    implementation(libs.androidx.security.crypto)
-    implementation(libs.androidx.biometric)
+    implementation("androidx.security:security-crypto:1.1.0-alpha06")
+    implementation("androidx.biometric:biometric:1.1.0")
     implementation(libs.androidx.datastore.preferences)
 
     // Coroutines
