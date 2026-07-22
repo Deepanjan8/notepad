@@ -56,8 +56,8 @@ class EditorViewModel @Inject constructor(
 
     val categories: StateFlow<List<Category>> = categoryDao.getAllCategories()
         .map { list -> list.map { it.toDomain() } }
-        .catch { emit(emptyList()) }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+        .catch { emit(emptyList<Category>()) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList<Category>())
 
     init {
         if (noteId > 0L) {

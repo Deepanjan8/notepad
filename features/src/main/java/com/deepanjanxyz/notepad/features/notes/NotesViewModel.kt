@@ -37,11 +37,11 @@ class NotesViewModel @Inject constructor(
     val selectedCategoryId: StateFlow<Long?> = _selectedCategoryId.asStateFlow()
 
     val categories: StateFlow<List<Category>> = categoryDao.getAllCategories()
-        .catch { emit(emptyList()) }
+        .catch { emit(emptyList<Category>()) }
         .combine(_selectedCategoryId) { list, selectedId ->
             list.map { it.toDomain() }
         }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList<Category>())
 
     val notes: StateFlow<List<Note>> = combine(
         noteDao.getAllNotes(),
@@ -60,8 +60,8 @@ class NotesViewModel @Inject constructor(
         }
         filtered
     }
-        .catch { emit(emptyList()) }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+        .catch { emit(emptyList<Note>()) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList<Note>())
 
     private val _selectedNoteIds = MutableStateFlow<Set<Long>>(emptySet())
     val selectedNoteIds: StateFlow<Set<Long>> = _selectedNoteIds.asStateFlow()
