@@ -6,8 +6,10 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
+import kotlin.jvm.JvmSuppressWildcards
 
 @Dao
+@JvmSuppressWildcards
 interface CategoryDao {
     @Query("SELECT * FROM categories ORDER BY id ASC")
     fun getAllCategories(): Flow<List<CategoryEntity>>
@@ -19,5 +21,5 @@ interface CategoryDao {
     suspend fun insertCategory(category: CategoryEntity): Long
 
     @Delete
-    suspend fun deleteCategory(category: CategoryEntity)
+    suspend fun deleteCategory(category: CategoryEntity): Int
 }

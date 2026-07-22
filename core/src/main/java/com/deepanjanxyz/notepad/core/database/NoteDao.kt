@@ -7,8 +7,10 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
+import kotlin.jvm.JvmSuppressWildcards
 
 @Dao
+@JvmSuppressWildcards
 interface NoteDao {
     @Query("SELECT * FROM notes ORDER BY is_pinned DESC, updated_at DESC")
     fun getAllNotes(): Flow<List<NoteEntity>>
@@ -26,11 +28,11 @@ interface NoteDao {
     suspend fun insertNote(note: NoteEntity): Long
 
     @Update
-    suspend fun updateNote(note: NoteEntity)
+    suspend fun updateNote(note: NoteEntity): Int
 
     @Delete
-    suspend fun deleteNote(note: NoteEntity)
+    suspend fun deleteNote(note: NoteEntity): Int
 
     @Query("DELETE FROM notes WHERE id = :id")
-    suspend fun deleteNoteById(id: Long)
+    suspend fun deleteNoteById(id: Long): Int
 }
