@@ -63,12 +63,36 @@ class NotesViewModel @Inject constructor(
         .catch { emit(emptyList()) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
+    private val _selectedNoteIds = MutableStateFlow<Set<Long>>(emptySet())
+    val selectedNoteIds: StateFlow<Set<Long>> = _selectedNoteIds.asStateFlow()
+
     fun setSearchQuery(query: String) {
         _searchQuery.value = query
     }
 
     fun selectCategory(categoryId: Long?) {
         _selectedCategoryId.value = if (_selectedCategoryId.value == categoryId) null else categoryId
+    }
+
+    // Toggle single note selection for gesture and tap actions
+    fun toggleNoteSelection(noteId: Long) {
+        val current = _selectedNoteIds.value
+        _selectedNoteIds.value = if (current.contains(noteId)) current - noteId else current + noteId
+    }
+
+    // Select specific note ID during swipe gesture
+    fun selectNote(noteId: Long) {
+        _selectedNoteIds.value = _selectedNoteIds.value + noteId
+    }
+
+    // Select all displayed notes
+    fun selectAllNotes(ids: List<Long>) {
+        _selectedNoteIds.value = ids.toSet()
+    }
+
+    // Clear multi-selection state
+    fun clearSelection() {
+        _selectedNoteIds.value = emptySet()
     }
 
     fun togglePin(note: Note) {
@@ -85,6 +109,19 @@ class NotesViewModel @Inject constructor(
             runCatching {
                 noteDao.deleteNote(note.toEntity())
             }
+        }
+    }
+
+    // Bulk delete selected notes and reset selection state
+    fun deleteSelectedNotes(ids: Set<Long>) {
+        viewModelScope.launch(exceptionHandler) {
+            runCatching {
+                val allEntities = noteDao.getAllNotes()
+                ids.forEach { id ->
+                    noteDao.deleteNoteById(id)
+                }
+            }
+            clearSelection()
         }
     }
 }

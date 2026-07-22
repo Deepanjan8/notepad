@@ -61,10 +61,30 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.boundsInParent
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalHapticFeedback
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun NotesScreen(
     viewModel: NotesViewModel,
@@ -75,38 +95,123 @@ fun NotesScreen(
     val categories by viewModel.categories.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
     val selectedCategoryId by viewModel.selectedCategoryId.collectAsState()
+    val selectedNoteIds by viewModel.selectedNoteIds.collectAsState()
+
+    val isSelectionMode = selectedNoteIds.isNotEmpty()
+    val haptic = LocalHapticFeedback.current
+
+    // State for track-by-touch bounds in swipe selection gesture
+    var itemBoundsMap by remember { mutableStateOf(mapOf<Long, Rect>()) }
+
+    // State for delete confirmation dialog
+    var noteToDelete by remember { mutableStateOf<Note?>(null) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var isBulkDelete by remember { mutableStateOf(false) }
+
+    // Delete confirmation dialog
+    if (showDeleteDialog) {
+        val deleteCount = if (isBulkDelete) selectedNoteIds.size else 1
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = {
+                Text(
+                    text = "Delete Note?",
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = {
+                Text(
+                    text = if (deleteCount > 1) {
+                        "Are you sure you want to delete these $deleteCount notes? This action cannot be undone."
+                    } else {
+                        "Are you sure you want to delete this note? This action cannot be undone."
+                    }
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        if (isBulkDelete) {
+                            viewModel.deleteSelectedNotes(selectedNoteIds)
+                        } else {
+                            noteToDelete?.let { viewModel.deleteNote(it) }
+                        }
+                        showDeleteDialog = false
+                        noteToDelete = null
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error,
+                        contentColor = MaterialTheme.colorScheme.onError
+                    )
+                ) {
+                    Text("Delete")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showDeleteDialog = false
+                        noteToDelete = null
+                    }
+                ) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (isSelectionMode) {
                         Text(
-                            text = "Elite Memo Pro",
+                            text = "${selectedNoteIds.size} selected",
                             fontWeight = FontWeight.Bold,
                             style = MaterialTheme.typography.titleLarge
                         )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Surface(
-                            shape = CircleShape,
-                            color = MaterialTheme.colorScheme.primaryContainer,
-                            modifier = Modifier.padding(horizontal = 4.dp)
-                        ) {
+                    } else {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
-                                text = "100% Offline",
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                                text = "Elite Memo Pro",
+                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.titleLarge
                             )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Surface(
+                                shape = CircleShape,
+                                color = MaterialTheme.colorScheme.primaryContainer,
+                                modifier = Modifier.padding(horizontal = 4.dp)
+                            ) {
+                                Text(
+                                    text = "100% Offline",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                                )
+                            }
+                        }
+                    }
+                },
+                navigationIcon = {
+                    if (isSelectionMode) {
+                        IconButton(onClick = viewModel::clearSelection) {
+                            Icon(Icons.Default.Close, contentDescription = "Clear Selection")
                         }
                     }
                 },
                 actions = {
-                    IconButton(onClick = onNavigateToSettings) {
-                        Icon(
-                            imageVector = Icons.Default.Settings,
-                            contentDescription = "Settings"
-                        )
+                    if (isSelectionMode) {
+                        TextButton(onClick = { viewModel.selectAllNotes(notes.map { it.id }) }) {
+                            Text("Select All")
+                        }
+                    } else {
+                        IconButton(onClick = onNavigateToSettings) {
+                            Icon(
+                                imageVector = Icons.Default.Settings,
+                                contentDescription = "Settings"
+                            )
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -114,17 +219,62 @@ fun NotesScreen(
                 )
             )
         },
+        bottomBar = {
+            // Bottom Action Bar for batch multi-selection operations
+            AnimatedVisibility(
+                visible = isSelectionMode,
+                enter = slideInVertically { it },
+                exit = slideOutVertically { it }
+            ) {
+                Surface(
+                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    tonalElevation = 8.dp,
+                    shadowElevation = 8.dp,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "${selectedNoteIds.size} notes selected",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Button(
+                            onClick = {
+                                isBulkDelete = true
+                                showDeleteDialog = true
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.error,
+                                contentColor = MaterialTheme.colorScheme.onError
+                            )
+                        ) {
+                            Icon(Icons.Default.Delete, contentDescription = null)
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text("Delete (${selectedNoteIds.size})")
+                        }
+                    }
+                }
+            }
+        },
         floatingActionButton = {
             // Keep FAB always visible and dynamically floating above software keyboard
-            FloatingActionButton(
-                onClick = { onNavigateToEditor(0L) },
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
-                modifier = Modifier
-                    .navigationBarsPadding()
-                    .imePadding()
-            ) {
-                Icon(imageVector = Icons.Default.Add, contentDescription = "Create Note")
+            if (!isSelectionMode) {
+                FloatingActionButton(
+                    onClick = { onNavigateToEditor(0L) },
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                    modifier = Modifier
+                        .navigationBarsPadding()
+                        .imePadding()
+                ) {
+                    Icon(imageVector = Icons.Default.Add, contentDescription = "Create Note")
+                }
             }
         }
     ) { padding ->
@@ -177,7 +327,7 @@ fun NotesScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Notes List / Grid
+            // Notes List / Grid area with gesture multi-selection support
             if (notes.isEmpty()) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -204,19 +354,67 @@ fun NotesScreen(
                     }
                 }
             } else {
-                LazyVerticalGrid(
-                    columns = GridCells.Adaptive(minSize = 160.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                    contentPadding = PaddingValues(bottom = 80.dp)
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        // Detect long-press and continuous drag/swipe gesture across note items
+                        .pointerInput(notes, selectedNoteIds) {
+                            detectDragGesturesAfterLongPress(
+                                onDragStart = { offset ->
+                                    itemBoundsMap.entries.firstOrNull { it.value.contains(offset) }?.key?.let { id ->
+                                        if (!selectedNoteIds.contains(id)) {
+                                            viewModel.selectNote(id)
+                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        }
+                                    }
+                                },
+                                onDrag = { change, _ ->
+                                    val touchPoint = change.position
+                                    itemBoundsMap.entries.firstOrNull { it.value.contains(touchPoint) }?.key?.let { id ->
+                                        if (!selectedNoteIds.contains(id)) {
+                                            viewModel.selectNote(id)
+                                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                        }
+                                    }
+                                }
+                            )
+                        }
                 ) {
-                    items(notes, key = { it.id }) { note ->
-                        NoteCard(
-                            note = note,
-                            onClick = { onNavigateToEditor(note.id) },
-                            onTogglePin = { viewModel.togglePin(note) },
-                            onDelete = { viewModel.deleteNote(note) }
-                        )
+                    LazyVerticalGrid(
+                        columns = GridCells.Adaptive(minSize = 160.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        contentPadding = PaddingValues(bottom = 80.dp)
+                    ) {
+                        items(notes, key = { it.id }) { note ->
+                            NoteCard(
+                                note = note,
+                                isSelected = selectedNoteIds.contains(note.id),
+                                isSelectionMode = isSelectionMode,
+                                onClick = {
+                                    if (isSelectionMode) {
+                                        viewModel.toggleNoteSelection(note.id)
+                                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                    } else {
+                                        onNavigateToEditor(note.id)
+                                    }
+                                },
+                                onLongClick = {
+                                    viewModel.toggleNoteSelection(note.id)
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                },
+                                onTogglePin = { viewModel.togglePin(note) },
+                                onDelete = {
+                                    noteToDelete = note
+                                    isBulkDelete = false
+                                    showDeleteDialog = true
+                                },
+                                modifier = Modifier.onGloballyPositioned { coordinates ->
+                                    val parentBounds = coordinates.boundsInParent()
+                                    itemBoundsMap = itemBoundsMap + (note.id to parentBounds)
+                                }
+                            )
+                        }
                     }
                 }
             }
@@ -224,23 +422,32 @@ fun NotesScreen(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun NoteCard(
     note: Note,
+    isSelected: Boolean,
+    isSelectionMode: Boolean,
     onClick: () -> Unit,
+    onLongClick: () -> Unit,
     onTogglePin: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
     val dateStr = dateFormat.format(Date(note.updatedAt))
 
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick),
+            .combinedClickable(
+                onClick = onClick,
+                onLongClick = onLongClick
+            ),
         shape = RoundedCornerShape(16.dp),
+        border = if (isSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
+            containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant
         )
     ) {
         Column(
@@ -261,12 +468,20 @@ private fun NoteCard(
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f)
                 )
-                IconButton(onClick = onTogglePin) {
+                if (isSelected) {
                     Icon(
-                        imageVector = if (note.isPinned) Icons.Default.PushPin else Icons.Default.Pin,
-                        contentDescription = "Pin Note",
-                        tint = if (note.isPinned) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
+                        imageVector = Icons.Default.CheckCircle,
+                        contentDescription = "Selected",
+                        tint = MaterialTheme.colorScheme.primary
                     )
+                } else {
+                    IconButton(onClick = onTogglePin) {
+                        Icon(
+                            imageVector = if (note.isPinned) Icons.Default.PushPin else Icons.Default.Pin,
+                            contentDescription = "Pin Note",
+                            tint = if (note.isPinned) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
+                        )
+                    }
                 }
             }
 
@@ -292,12 +507,14 @@ private fun NoteCard(
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.outline
                 )
-                IconButton(onClick = onDelete) {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = "Delete Note",
-                        tint = MaterialTheme.colorScheme.error
-                    )
+                if (!isSelectionMode) {
+                    IconButton(onClick = onDelete) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Delete Note",
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                    }
                 }
             }
         }

@@ -52,7 +52,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.deepanjanxyz.notepad.core.ui.components.MarkdownRenderer
 import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.imePadding
+import android.widget.Toast
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.platform.LocalContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -68,6 +72,33 @@ fun EditorScreen(
     val wordCount = content.trim().let { if (it.isEmpty()) 0 else it.split("\\s+".toRegex()).size }
     val charCount = content.length
 
+    val context = LocalContext.current
+
+    // Auto-save logic when navigating back
+    val handleAutoSaveAndBack: () -> Unit = {
+        if (title.isNotBlank() || content.isNotBlank()) {
+            viewModel.saveNote {
+                Toast.makeText(context, "Auto Saved", Toast.LENGTH_SHORT).show()
+                onBack()
+            }
+        } else {
+            onBack()
+        }
+    }
+
+    // Manual save button action
+    val handleManualSave: () -> Unit = {
+        viewModel.saveNote {
+            Toast.makeText(context, "Saved Successfully", Toast.LENGTH_SHORT).show()
+            onBack()
+        }
+    }
+
+    // Intercept system back gestures to trigger auto-save
+    BackHandler {
+        handleAutoSaveAndBack()
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -78,7 +109,7 @@ fun EditorScreen(
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = { viewModel.saveNote(onBack) }) {
+                    IconButton(onClick = handleAutoSaveAndBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Save and Back"
@@ -93,11 +124,25 @@ fun EditorScreen(
                             tint = if (isPinned) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
                         )
                     }
-                    IconButton(onClick = { viewModel.saveNote(onBack) }) {
-                        Icon(
-                            imageVector = Icons.Default.Check,
-                            contentDescription = "Save"
-                        )
+                    // Redesigned Save button with prominent Material 3 circle container
+                    Surface(
+                        onClick = handleManualSave,
+                        shape = CircleShape,
+                        color = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primaryContainer),
+                        modifier = Modifier.padding(end = 8.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier.padding(8.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = "Save Note",
+                                tint = MaterialTheme.colorScheme.onPrimary
+                            )
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
