@@ -1,8 +1,8 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.kotlin.kapt)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -34,14 +34,6 @@ android {
         compose = true
     }
 
-    kapt {
-        correctErrorTypes = true
-        arguments {
-            arg("room.schemaLocation", "$projectDir/schemas")
-            arg("room.incremental", "true")
-            arg("room.expandProjection", "true")
-        }
-    }
 }
 
 dependencies {
@@ -59,7 +51,7 @@ dependencies {
     // Room Database
     api(libs.androidx.room.runtime)
     api(libs.androidx.room.ktx)
-    kapt(libs.androidx.room.compiler)
+    ksp(libs.androidx.room.compiler)
     api(libs.androidx.sqlite.ktx)
 
     // Security & DataStore & Biometric

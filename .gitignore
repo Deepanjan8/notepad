@@ -14,3 +14,4 @@ local.properties
 *.keystore
 my-release-key.jks
 keystore.properties
+BLUEPRINT.md
