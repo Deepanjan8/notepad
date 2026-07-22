@@ -38,6 +38,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
 
+import androidx.activity.compose.BackHandler
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
@@ -49,6 +53,15 @@ fun SettingsScreen(
     val errorMessage by viewModel.errorMessage.collectAsState()
     val statusMessage by viewModel.statusMessage.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
+
+    // Single-execution navigation guard flag to prevent double-tap glitches
+    var isNavigating by remember { mutableStateOf(false) }
+
+    // Intercept system back gestures with navigation guard
+    BackHandler(enabled = !isNavigating) {
+        isNavigating = true
+        onBack()
+    }
 
     LaunchedEffect(errorMessage) {
         errorMessage?.let { error ->
@@ -63,7 +76,15 @@ fun SettingsScreen(
             TopAppBar(
                 title = { Text("Settings", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
+                    IconButton(
+                        onClick = {
+                            if (!isNavigating) {
+                                isNavigating = true
+                                onBack()
+                            }
+                        },
+                        enabled = !isNavigating
+                    ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back"

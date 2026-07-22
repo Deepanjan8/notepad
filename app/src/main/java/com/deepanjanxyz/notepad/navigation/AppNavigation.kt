@@ -52,7 +52,11 @@ fun AppNavigation(
             val viewModel: EditorViewModel = hiltViewModel()
             EditorScreen(
                 viewModel = viewModel,
-                onBack = { navController.popBackStack() }
+                onBack = {
+                    if (navController.currentDestination?.route?.startsWith("editor") == true) {
+                        navController.popBackStack()
+                    }
+                }
             )
         }
 
@@ -60,7 +64,11 @@ fun AppNavigation(
             val viewModel: SettingsViewModel = hiltViewModel()
             SettingsScreen(
                 viewModel = viewModel,
-                onBack = { navController.popBackStack() }
+                onBack = {
+                    if (navController.currentDestination?.route == NavRoutes.SETTINGS) {
+                        navController.popBackStack()
+                    }
+                }
             )
         }
     }
