@@ -21,7 +21,7 @@
 
 - **Architecture**: Modular Clean Architecture (`:app`, `:core`, `:features`)
 - **UI**: Jetpack Compose + Material 3 + Adaptive Edge-to-Edge Layouts
-- **Language**: Kotlin 1.9.23 / Java 21
+- **Language**: Kotlin 2.3.21 / Java 21
 - **Database**: Room Database + SQLCipher (`net.zetetic:sqlcipher-android`)
 - **Security**: Jetpack Security EncryptedSharedPreferences + Biometric Prompt API
 - **Dependency Injection**: Hilt
