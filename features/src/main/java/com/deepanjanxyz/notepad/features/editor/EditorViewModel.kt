@@ -48,6 +48,9 @@ class EditorViewModel @Inject constructor(
     private val _isPinned = MutableStateFlow(false)
     val isPinned: StateFlow<Boolean> = _isPinned.asStateFlow()
 
+    private val _isArchived = MutableStateFlow(false)
+    val isArchived: StateFlow<Boolean> = _isArchived.asStateFlow()
+
     private val _editorMode = MutableStateFlow(EditorMode.EDIT)
     val editorMode: StateFlow<EditorMode> = _editorMode.asStateFlow()
 
@@ -65,6 +68,7 @@ class EditorViewModel @Inject constructor(
                     _content.value = existing.content
                     _selectedCategoryId.value = existing.categoryId
                     _isPinned.value = existing.isPinned
+                    _isArchived.value = existing.isArchived
                 }
             }
         }
@@ -86,6 +90,11 @@ class EditorViewModel @Inject constructor(
         _isPinned.value = !_isPinned.value
     }
 
+    // Toggle note archive state
+    fun toggleArchive() {
+        _isArchived.value = !_isArchived.value
+    }
+
     fun setEditorMode(mode: EditorMode) {
         _editorMode.value = mode
     }
@@ -103,6 +112,7 @@ class EditorViewModel @Inject constructor(
                     content = _content.value,
                     categoryId = _selectedCategoryId.value,
                     isPinned = _isPinned.value,
+                    isArchived = _isArchived.value,
                     updatedAt = System.currentTimeMillis()
                 )
                 noteDao.insertNote(currentNote.toEntity())

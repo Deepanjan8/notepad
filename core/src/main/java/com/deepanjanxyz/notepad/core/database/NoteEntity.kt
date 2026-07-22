@@ -19,6 +19,8 @@ data class NoteEntity(
     val categoryId: Long = 1,
     @ColumnInfo(name = "is_pinned")
     val isPinned: Boolean = false,
+    @ColumnInfo(name = "is_archived")
+    val isArchived: Boolean = false,
     @ColumnInfo(name = "color_hex")
     val colorHex: String = "#6200EE"
 )
@@ -33,6 +35,7 @@ fun NoteEntity.toDomain(categoryName: String = "General"): Note {
         categoryId = categoryId,
         categoryName = categoryName,
         isPinned = isPinned,
+        isArchived = isArchived,
         colorHex = colorHex
     )
 }
@@ -46,6 +49,7 @@ fun Note.toEntity(): NoteEntity {
         updatedAt = updatedAt,
         categoryId = categoryId,
         isPinned = isPinned,
+        isArchived = isArchived,
         colorHex = colorHex
     )
 }

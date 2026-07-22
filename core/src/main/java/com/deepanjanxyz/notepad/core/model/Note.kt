@@ -9,5 +9,6 @@ data class Note(
     val categoryId: Long = 1,
     val categoryName: String = "General",
     val isPinned: Boolean = false,
+    val isArchived: Boolean = false,
     val colorHex: String = "#6200EE"
 )
