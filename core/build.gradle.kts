@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.deepanjanxyz.notepad.core"
-    compileSdk = 37
+    compileSdk = 35
 
     defaultConfig {
         minSdk = 26
