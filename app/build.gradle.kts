@@ -7,12 +7,12 @@ plugins {
 
 android {
     namespace = "com.deepanjanxyz.notepad"
-    compileSdk = 35
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.deepanjanxyz.notepad"
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 37
         versionCode = 5
         versionName = "1.0.5"
 

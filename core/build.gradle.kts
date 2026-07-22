@@ -60,8 +60,8 @@ dependencies {
     api(libs.androidx.sqlite.ktx)
 
     // Security & DataStore & Biometric
-    api("androidx.security:security-crypto:1.0.0")
-    api("androidx.biometric:biometric:1.1.0")
+    api(libs.androidx.security.crypto)
+    api(libs.androidx.biometric)
     api(libs.androidx.datastore.preferences)
 
     // Coroutines
