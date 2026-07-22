@@ -86,13 +86,6 @@ fun EditorScreen(
     // Navigation debounce guard to prevent double-tap glitches
     var isNavigating by remember { mutableStateOf(false) }
 
-    // Auto-scroll to bottom of editor container as long notes are typed to keep cursor visible
-    LaunchedEffect(content) {
-        if (content.isNotEmpty()) {
-            scrollState.animateScrollTo(scrollState.maxValue)
-        }
-    }
-
     // Auto-save logic when navigating back with debounce guard
     val handleAutoSaveAndBack: () -> Unit = {
         if (!isNavigating) {
@@ -201,10 +194,11 @@ fun EditorScreen(
             )
         },
         bottomBar = {
-            // Google Keep style bottom formatting toolbar anchored above IME software keyboard
+            // Material 3 expressive bottom formatting bar anchored directly above software keyboard
             Surface(
-                color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                tonalElevation = 6.dp,
+                color = MaterialTheme.colorScheme.surfaceContainer,
+                tonalElevation = 3.dp,
+                shape = androidx.compose.foundation.shape.RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
                 modifier = Modifier
                     .fillMaxWidth()
                     .navigationBarsPadding()
@@ -217,27 +211,57 @@ fun EditorScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Formatting shortcuts row
+                    // Formatting shortcuts row with M3 IconButton styling
                     Row(
                         modifier = Modifier.horizontalScroll(rememberScrollState()),
                         horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        IconButton(onClick = { viewModel.insertMarkdown("**", "**") }) {
+                        IconButton(
+                            onClick = { viewModel.insertMarkdown("**", "**") },
+                            colors = androidx.compose.material3.IconButtonDefaults.iconButtonColors(
+                                contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        ) {
                             Icon(Icons.Default.FormatBold, contentDescription = "Bold")
                         }
-                        IconButton(onClick = { viewModel.insertMarkdown("*", "*") }) {
+                        IconButton(
+                            onClick = { viewModel.insertMarkdown("*", "*") },
+                            colors = androidx.compose.material3.IconButtonDefaults.iconButtonColors(
+                                contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        ) {
                             Icon(Icons.Default.FormatItalic, contentDescription = "Italic")
                         }
-                        IconButton(onClick = { viewModel.insertMarkdown("# ") }) {
+                        IconButton(
+                            onClick = { viewModel.insertMarkdown("# ") },
+                            colors = androidx.compose.material3.IconButtonDefaults.iconButtonColors(
+                                contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        ) {
                             Icon(Icons.Default.Title, contentDescription = "Header")
                         }
-                        IconButton(onClick = { viewModel.insertMarkdown("- ") }) {
+                        IconButton(
+                            onClick = { viewModel.insertMarkdown("- ") },
+                            colors = androidx.compose.material3.IconButtonDefaults.iconButtonColors(
+                                contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        ) {
                             Icon(Icons.Default.FormatListBulleted, contentDescription = "Bullet List")
                         }
-                        IconButton(onClick = { viewModel.insertMarkdown("1. ") }) {
+                        IconButton(
+                            onClick = { viewModel.insertMarkdown("1. ") },
+                            colors = androidx.compose.material3.IconButtonDefaults.iconButtonColors(
+                                contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        ) {
                             Icon(Icons.Default.FormatListNumbered, contentDescription = "Numbered List")
                         }
-                        IconButton(onClick = { viewModel.insertMarkdown("`", "`") }) {
+                        IconButton(
+                            onClick = { viewModel.insertMarkdown("`", "`") },
+                            colors = androidx.compose.material3.IconButtonDefaults.iconButtonColors(
+                                contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        ) {
                             Icon(Icons.Default.Code, contentDescription = "Code")
                         }
                     }
@@ -245,7 +269,12 @@ fun EditorScreen(
                     // 3-dot overflow menu
                     Box {
                         var showOverflowMenu by remember { mutableStateOf(false) }
-                        IconButton(onClick = { showOverflowMenu = true }) {
+                        IconButton(
+                            onClick = { showOverflowMenu = true },
+                            colors = androidx.compose.material3.IconButtonDefaults.iconButtonColors(
+                                contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        ) {
                             Icon(Icons.Default.MoreVert, contentDescription = "More Options")
                         }
                         DropdownMenu(
@@ -309,7 +338,7 @@ fun EditorScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .padding(horizontal = 8.dp, vertical = 8.dp)
                 ) {
                     MarkdownRenderer(markdown = content.ifBlank { "*No content to preview*" })
                 }
@@ -325,9 +354,7 @@ fun EditorScreen(
                             )
                         )
                     },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .defaultMinSize(minHeight = 400.dp),
+                    modifier = Modifier.fillMaxWidth(),
                     textStyle = MaterialTheme.typography.bodyLarge,
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = Color.Transparent,
