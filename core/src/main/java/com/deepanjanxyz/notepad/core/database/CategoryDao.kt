@@ -19,5 +19,5 @@ interface CategoryDao {
     suspend fun insertCategory(category: CategoryEntity): Long
 
     @Delete
-    suspend fun deleteCategory(category: CategoryEntity)
+    suspend fun deleteCategory(category: CategoryEntity): Int
 }
