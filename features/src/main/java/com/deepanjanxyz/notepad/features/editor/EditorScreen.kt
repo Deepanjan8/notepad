@@ -59,6 +59,11 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.platform.LocalContext
 
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditorScreen(
@@ -74,24 +79,41 @@ fun EditorScreen(
     val charCount = content.length
 
     val context = LocalContext.current
+    val scrollState = rememberScrollState()
 
-    // Auto-save logic when navigating back
+    // Navigation debounce guard to prevent double-tap glitches
+    var isNavigating by remember { mutableStateOf(false) }
+
+    // Auto-scroll to bottom of editor container as long notes are typed to keep cursor visible
+    LaunchedEffect(content) {
+        if (content.isNotEmpty()) {
+            scrollState.animateScrollTo(scrollState.maxValue)
+        }
+    }
+
+    // Auto-save logic when navigating back with debounce guard
     val handleAutoSaveAndBack: () -> Unit = {
-        if (title.isNotBlank() || content.isNotBlank()) {
-            viewModel.saveNote {
-                Toast.makeText(context, "Auto Saved", Toast.LENGTH_SHORT).show()
+        if (!isNavigating) {
+            isNavigating = true
+            if (title.isNotBlank() || content.isNotBlank()) {
+                viewModel.saveNote {
+                    Toast.makeText(context, "Auto Saved", Toast.LENGTH_SHORT).show()
+                    onBack()
+                }
+            } else {
                 onBack()
             }
-        } else {
-            onBack()
         }
     }
 
     // Manual save button action
     val handleManualSave: () -> Unit = {
-        viewModel.saveNote {
-            Toast.makeText(context, "Saved Successfully", Toast.LENGTH_SHORT).show()
-            onBack()
+        if (!isNavigating) {
+            isNavigating = true
+            viewModel.saveNote {
+                Toast.makeText(context, "Saved Successfully", Toast.LENGTH_SHORT).show()
+                onBack()
+            }
         }
     }
 
@@ -152,13 +174,13 @@ fun EditorScreen(
             )
         }
     ) { padding ->
-        // Fully scrollable container with imePadding for smooth editing with open keyboard
+        // Scrollable body with imePadding so TopAppBar stays fixed at top when keyboard opens
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
                 .imePadding()
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(scrollState)
                 .padding(horizontal = 12.dp, vertical = 2.dp)
         ) {
             // Mode Selector: Edit | Preview | Split

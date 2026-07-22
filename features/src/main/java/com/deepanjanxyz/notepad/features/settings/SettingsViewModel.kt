@@ -21,6 +21,11 @@ class SettingsViewModel @Inject constructor(
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
 
+    private val _statusMessage = MutableStateFlow<String?>(
+        if (securityManager.isDeviceLockEnabled()) "Biometric lock activated" else "Biometric lock deactivated"
+    )
+    val statusMessage: StateFlow<String?> = _statusMessage.asStateFlow()
+
     fun toggleDeviceLock(activity: FragmentActivity, enabled: Boolean) {
         if (enabled) {
             // Verify biometric before enabling lock
@@ -33,9 +38,11 @@ class SettingsViewModel @Inject constructor(
                         securityManager.setDeviceLockEnabled(true)
                         _useDeviceLock.value = true
                         _errorMessage.value = null
+                        _statusMessage.value = "Biometric lock activated"
                     },
                     onError = { error ->
-                        _errorMessage.value = error
+                        _errorMessage.value = "Biometric authentication failed or cancelled"
+                        _statusMessage.value = "Biometric authentication failed or cancelled"
                     }
                 )
             } else {
@@ -52,14 +59,17 @@ class SettingsViewModel @Inject constructor(
                         securityManager.setDeviceLockEnabled(false)
                         _useDeviceLock.value = false
                         _errorMessage.value = null
+                        _statusMessage.value = "Biometric lock deactivated"
                     },
                     onError = { error ->
-                        _errorMessage.value = error
+                        _errorMessage.value = "Biometric authentication failed or cancelled"
+                        _statusMessage.value = "Biometric authentication failed or cancelled"
                     }
                 )
             } else {
                 securityManager.setDeviceLockEnabled(false)
                 _useDeviceLock.value = false
+                _statusMessage.value = "Biometric lock deactivated"
             }
         }
     }

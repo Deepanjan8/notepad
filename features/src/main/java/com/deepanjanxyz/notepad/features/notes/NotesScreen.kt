@@ -115,6 +115,8 @@ fun NotesScreen(
         val deleteCount = if (isBulkDelete) selectedNoteIds.size else 1
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
+            shape = RoundedCornerShape(28.dp),
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
             title = {
                 Text(
                     text = "Delete Note?",
@@ -449,7 +451,7 @@ private fun NoteCard(
         shape = RoundedCornerShape(16.dp),
         border = if (isSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
         colors = CardDefaults.cardColors(
-            containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant
+            containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerHigh
         )
     ) {
         Column(
