@@ -61,7 +61,19 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-@OptIn(ExperimentalMaterial3Api::class)
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.isImeVisible
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.focus.onFocusChanged
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun NotesScreen(
     viewModel: NotesViewModel,
@@ -72,6 +84,11 @@ fun NotesScreen(
     val categories by viewModel.categories.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
     val selectedCategoryId by viewModel.selectedCategoryId.collectAsState()
+
+    // Track search focus and keyboard visibility to manage FAB positioning
+    var isSearchFocused by remember { mutableStateOf(false) }
+    val isImeVisible = WindowInsets.isImeVisible
+    val isKeyboardOpen = isImeVisible || isSearchFocused
 
     Scaffold(
         topBar = {
@@ -112,12 +129,20 @@ fun NotesScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = { onNavigateToEditor(0L) },
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
+            // Hide FAB when soft keyboard is active or search is focused to avoid overlapping search UI
+            AnimatedVisibility(
+                visible = !isKeyboardOpen,
+                enter = fadeIn(),
+                exit = fadeOut()
             ) {
-                Icon(imageVector = Icons.Default.Add, contentDescription = "Create Note")
+                FloatingActionButton(
+                    onClick = { onNavigateToEditor(0L) },
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                    modifier = Modifier.imePadding()
+                ) {
+                    Icon(imageVector = Icons.Default.Add, contentDescription = "Create Note")
+                }
             }
         }
     ) { padding ->
@@ -125,6 +150,7 @@ fun NotesScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
+                .imePadding()
                 .padding(horizontal = 16.dp)
         ) {
             // Search Input Field
@@ -135,7 +161,8 @@ fun NotesScreen(
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search") },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 8.dp),
+                    .padding(vertical = 8.dp)
+                    .onFocusChanged { isSearchFocused = it.isFocused },
                 shape = RoundedCornerShape(16.dp),
                 singleLine = true,
                 colors = OutlinedTextFieldDefaults.colors(

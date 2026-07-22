@@ -44,9 +44,4 @@ class MainActivity : FragmentActivity() {
             }
         }
     }
-
-    override fun onPause() {
-        super.onPause()
-        securityManager.lock()
-    }
 }

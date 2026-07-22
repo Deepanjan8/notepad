@@ -48,9 +48,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.deepanjanxyz.notepad.core.ui.components.MarkdownRenderer
+import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.imePadding
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -104,17 +105,20 @@ fun EditorScreen(
             )
         }
     ) { padding ->
+        // Fully scrollable container with imePadding for smooth editing with open keyboard
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(horizontal = 16.dp)
+                .imePadding()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 12.dp, vertical = 2.dp)
         ) {
             // Mode Selector: Edit | Preview | Split
             SingleChoiceSegmentedButtonRow(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 4.dp)
+                    .padding(vertical = 2.dp)
             ) {
                 SegmentedButton(
                     selected = editorMode == EditorMode.EDIT,
@@ -139,14 +143,14 @@ fun EditorScreen(
                 }
             }
 
-            // Title Field
+            // Note Title Input Field
             OutlinedTextField(
                 value = title,
                 onValueChange = viewModel::setTitle,
                 placeholder = { Text("Note Title...") },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 4.dp),
+                    .padding(vertical = 2.dp),
                 textStyle = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                 singleLine = true,
                 colors = OutlinedTextFieldDefaults.colors(
@@ -161,7 +165,7 @@ fun EditorScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .horizontalScroll(rememberScrollState())
-                        .padding(vertical = 4.dp),
+                        .padding(vertical = 2.dp),
                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     IconButton(onClick = { viewModel.insertMarkdown("# ") }) {
@@ -188,11 +192,11 @@ fun EditorScreen(
                 }
             }
 
-            // Main Editor & Preview Content Area
+            // Editor Content Area
             Box(
                 modifier = Modifier
-                    .weight(1f)
                     .fillMaxWidth()
+                    .defaultMinSize(minHeight = 350.dp)
             ) {
                 when (editorMode) {
                     EditorMode.EDIT -> {
@@ -200,7 +204,9 @@ fun EditorScreen(
                             value = content,
                             onValueChange = viewModel::setContent,
                             placeholder = { Text("Type your Markdown memo here...") },
-                            modifier = Modifier.fillMaxSize(),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .defaultMinSize(minHeight = 350.dp),
                             colors = OutlinedTextFieldDefaults.colors(
                                 focusedBorderColor = Color.Transparent,
                                 unfocusedBorderColor = Color.Transparent
@@ -210,21 +216,25 @@ fun EditorScreen(
                     EditorMode.PREVIEW -> {
                         Column(
                             modifier = Modifier
-                                .fillMaxSize()
-                                .verticalScroll(rememberScrollState())
+                                .fillMaxWidth()
+                                .padding(top = 8.dp)
                         ) {
                             MarkdownRenderer(markdown = content)
                         }
                     }
                     EditorMode.SPLIT -> {
-                        Row(modifier = Modifier.fillMaxSize()) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .defaultMinSize(minHeight = 350.dp)
+                        ) {
                             OutlinedTextField(
                                 value = content,
                                 onValueChange = viewModel::setContent,
                                 placeholder = { Text("Edit...") },
                                 modifier = Modifier
                                     .weight(1f)
-                                    .fillMaxHeight(),
+                                    .defaultMinSize(minHeight = 350.dp),
                                 colors = OutlinedTextFieldDefaults.colors(
                                     focusedBorderColor = Color.Transparent,
                                     unfocusedBorderColor = Color.Transparent
@@ -234,8 +244,7 @@ fun EditorScreen(
                             Column(
                                 modifier = Modifier
                                     .weight(1f)
-                                    .fillMaxHeight()
-                                    .verticalScroll(rememberScrollState())
+                                    .defaultMinSize(minHeight = 350.dp)
                             ) {
                                 MarkdownRenderer(markdown = content)
                             }
@@ -248,7 +257,7 @@ fun EditorScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 8.dp),
+                    .padding(vertical = 6.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
