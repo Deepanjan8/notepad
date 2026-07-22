@@ -52,6 +52,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.deepanjanxyz.notepad.core.ui.components.MarkdownRenderer
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.imePadding
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
